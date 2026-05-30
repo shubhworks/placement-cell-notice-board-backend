@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String @id @default(cuid())
+  username String @unique
+  email    String @unique
+  password String
+  role     Role   @default(STUDENT)
+
+  notices      Notice[]      @relation("PostedNotices")
+  deviceTokens DeviceToken[] // A user can have multiple devices logged in
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  token     String   @unique // The Expo Push Token (e.g., ExponentPushToken[...])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Notice {
+  id          String     @id @default(cuid())
+  title       String
+  content     String     @db.Text
+  type        NoticeType @default(GENERAL_INFO)
+  attachments String[] // Array of URLs (Cloudinary/PDF links)
+
+  authorId   String
+  author     User    @relation("PostedNotices", fields: [authorId], references: [id])
+  senderName String? // E.g., "TPO Cell" or "Company HR"
+
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum NoticeType {
+  URGENT
+  PLACEMENT_DRIVE
+  EVENT
+  GENERAL_INFO
+}

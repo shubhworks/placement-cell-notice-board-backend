@@ -1,0 +1,1 @@
+{"root":["./src/config.ts","./src/index.ts","./src/prisma.config.ts","./src/controllers/noticecontrollers.ts","./src/controllers/usercontrollers.ts","./src/db/prisma.ts","./src/lib/zodschema.ts","./src/middlewares/userauthentication.ts","./src/routes/noticeroutes.ts","./src/routes/userroutes.ts"],"version":"6.0.3"}
