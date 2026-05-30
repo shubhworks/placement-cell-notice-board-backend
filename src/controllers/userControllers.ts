@@ -38,20 +38,18 @@ export const signup = async (req: Request, res: Response) => {
         // HASHING THE PASSWORD:
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const otpGenerated = Math.floor(100000 + Math.random() * 900000).toString();
 
         // STORING the user to Database!
         const USER = await prisma.user.create({
             data: {
                 username,
                 email,
-                password: hashedPassword,
-                verification_otp: otpGenerated
+                password: hashedPassword
             }
         });
 
         res.status(201).json({
-            message: `OTP Sent to ${USER.email} for verification!`,
+            message: `User created successfully!`,
             success: true
         });
 
