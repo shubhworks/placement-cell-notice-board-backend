@@ -150,3 +150,19 @@ export const saveExpoToken = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ error: "Failed to save push token" });
     }
 };
+
+export const removeExpoToken = async (req: AuthRequest, res: Response) => {
+    try {
+        const { pushToken } = req.body;
+        
+        if (!pushToken) return res.status(400).json({ error: "Missing pushToken" });
+
+        await prisma.deviceToken.deleteMany({
+            where: { token: pushToken }
+        });
+
+        res.status(200).json({ success: true, message: "Push token removed" });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to remove push token" });
+    }
+};

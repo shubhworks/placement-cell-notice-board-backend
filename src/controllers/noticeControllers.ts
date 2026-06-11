@@ -68,12 +68,32 @@ const sendExpoPushNotifications = async (title: string, content: string, type: s
 
     // Expo SDK handles batching to avoid hitting rate limits
     const chunks = expo.chunkPushNotifications(messages);
+    const tickets = [];
     for (let chunk of chunks) {
       try {
-        await expo.sendPushNotificationsAsync(chunk);
+        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        tickets.push(...ticketChunk);
       } catch (error) {
         console.error("Error sending chunk:", error);
       }
+    }
+
+    // Process tickets to identify invalid tokens
+    for (let i = 0; i < tickets.length; i++) {
+        const ticket = tickets[i];
+        const message = messages[i];
+
+        if (ticket && message && ticket.status === 'error') {
+            // ExpoPushErrorTicket has details, but the union type might need casting
+            const details = (ticket as any).details;
+            if (details && details.error === 'DeviceNotRegistered') {
+                const invalidToken = message.to;
+                if (typeof invalidToken === 'string') {
+                    console.log(`Removing unregistered token: ${invalidToken}`);
+                    await prisma.deviceToken.deleteMany({ where: { token: invalidToken } });
+                }
+            }
+        }
     }
   } catch (error) {
     console.error("Fatal error sending push notifications:", error);
